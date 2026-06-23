@@ -54,8 +54,13 @@ export const tools: Record<string, Tool> = {
   tmux: {
     name: "tmux",
     description: "Terminal multiplexer for panes, tabs, and persistent sessions.",
-    url: "https://github.com/tmux/tmux",
+    url: "https://github.com/tmux/tmux/wiki",
     logo: "/logos/tmux.svg",
+  },
+  skills: {
+    name: "npx skills CLI",
+    description: "Open CLI for installing and managing agent skills, run via npx.",
+    url: "https://github.com/vercel-labs/skills",
   },
   neovim: {
     name: "Neovim",
@@ -94,7 +99,7 @@ export const tools: Record<string, Tool> = {
   axi: {
     name: "AXI",
     description: "Tool-design standards that optimise for agent ergonomics.",
-    url: "https://github.com/kunchenguid/axi",
+    url: "https://axi.md/",
   },
   "open-super-whisper": {
     name: "Open Super Whisper",
