@@ -1,13 +1,15 @@
-type Tool = {
-  /** Display name. */
-  name: string;
-  /** One-line description of what it does. */
-  description: string;
-  /** Link to the repo / site. */
-  url: string;
-  /** Optional logo image URL. Falls back to the GitHub mark when omitted. */
-  logo?: string;
-};
+import { getTool, type Tool } from "@/lib/tools";
+
+/**
+ * What a post can pass in the `names` array:
+ *  - a string slug into the tool registry — `"claude-code"`
+ *  - a slug with a per-post description override — `{ slug, description }`
+ *  - a fully inline one-off not worth registering — `{ name, url, description }`
+ */
+type ToolRef =
+  | string
+  | { slug: string; description?: string }
+  | Tool;
 
 /** The GitHub Octocat mark, used as the default logo for repos without one. */
 function GitHubMark() {
@@ -23,10 +25,59 @@ function GitHubMark() {
   );
 }
 
-export function Tools({ tools }: { tools: Tool[] }) {
+/** Resolve a ToolRef into a concrete Tool, pulling from the registry by slug. */
+function resolveTool(ref: ToolRef): Tool {
+  if (typeof ref === "string") {
+    const tool = getTool(ref);
+    if (!tool) {
+      console.warn(`<Tools>: no registry entry for slug "${ref}"`);
+      return { name: ref, description: "", url: "#" };
+    }
+    return tool;
+  }
+  if ("slug" in ref) {
+    const tool = getTool(ref.slug);
+    if (!tool) {
+      console.warn(`<Tools>: no registry entry for slug "${ref.slug}"`);
+      return { name: ref.slug, description: ref.description ?? "", url: "#" };
+    }
+    return { ...tool, description: ref.description ?? tool.description };
+  }
+  return ref;
+}
+
+/** Bare hostname (no leading www.), or null when the URL has no real host. */
+function hostOf(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/** Pick an icon: registry logo, then site favicon, then the GitHub mark. */
+function iconFor(tool: Tool) {
+  if (tool.logo) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={tool.logo} alt="" className="h-5 w-5 object-contain" />;
+  }
+  const host = hostOf(tool.url);
+  if (!host || host === "github.com") return <GitHubMark />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${host}&sz=64`}
+      alt=""
+      className="h-5 w-5 object-contain"
+    />
+  );
+}
+
+export function Tools({ names }: { names: ToolRef[] }) {
+  const resolved = names.map(resolveTool);
   return (
     <ul className="not-prose my-6 grid gap-3 sm:grid-cols-2">
-      {tools.map((tool) => (
+      {resolved.map((tool) => (
         <li key={tool.name}>
           <a
             href={tool.url}
@@ -35,12 +86,7 @@ export function Tools({ tools }: { tools: Tool[] }) {
             className="flex h-full items-start gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-brand"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background">
-              {tool.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={tool.logo} alt="" className="h-5 w-5 object-contain" />
-              ) : (
-                <GitHubMark />
-              )}
+              {iconFor(tool)}
             </span>
             <span className="min-w-0">
               <span className="block font-semibold text-foreground">

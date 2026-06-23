@@ -22,22 +22,23 @@ machine is just good process, not magic.
 ## Tools
 
 {/* TODO: replace "#" with real URLs. Kun's six tools are on his GitHub (need his
-handle); Open Super Whisper's repo link also needs confirming. */}
+handle); Open Super Whisper's repo link also needs confirming. Well-known tools
+resolve from the registry in src/lib/tools.ts. */}
 
 <Tools
-  tools={[
+  names={[
     { name: "no-mistakes", description: "Validation pipeline: takes first-pass agent code to a clean, tested PR.", url: "#" },
     { name: "Lavish", description: "Visual, clickable planning artifacts instead of walls of text.", url: "#" },
     { name: "treehouse", description: "Git worktree manager so parallel agents don't collide.", url: "#" },
     { name: "goodnight-havefun", description: "Runs an agent in a loop for hours against a goal (overnight work).", url: "#" },
     { name: "first-mate", description: "Orchestrates the whole crew of agents for you.", url: "#" },
     { name: "AXI", description: "Tool-design standards that optimise for agent ergonomics.", url: "#" },
-    { name: "Claude Code", description: "Anthropic's terminal coding agent.", url: "https://github.com/anthropics/claude-code" },
-    { name: "Codex CLI", description: "OpenAI's open-source coding agent, written in Rust.", url: "https://github.com/openai/codex" },
-    { name: "opencode", description: "Model-agnostic terminal coding agent with a polished TUI.", url: "https://github.com/sst/opencode" },
-    { name: "WezTerm", description: "Cross-platform terminal emulator, configured in Lua.", url: "https://wezterm.org" },
-    { name: "tmux", description: "Terminal multiplexer for panes, tabs, and persistent sessions.", url: "https://github.com/tmux/tmux" },
-    { name: "Neovim", description: "Keyboard-driven modal text editor.", url: "https://neovim.io" },
+    "claude-code",
+    "codex-cli",
+    "opencode",
+    "wezterm",
+    "tmux",
+    "neovim",
     { name: "Open Super Whisper", description: "Free, local speech-to-text for voice prompting.", url: "#" },
   ]}
 />
