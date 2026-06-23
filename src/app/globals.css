@@ -1,26 +1,141 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
+/*
+ * Non Slop AI design tokens.
+ * Light mode is the canonical brand palette (warm white, Workflow Violet).
+ * Dark mode is carried over for OS-preference users and is not the brief.
+ * Change a value here and it propagates everywhere via Tailwind utilities
+ * (bg-background, text-muted, text-brand, border-border, …).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light; /* light-first brand: never follow OS dark mode */
+  --background: #fafaf8; /* warm white */
+  --foreground: #111318; /* primary text */
+  --surface: #f2f3f5; /* cards, tables, containers */
+  --border: #e2e5ea; /* subtle structure */
+  --muted: #69707d; /* metadata, captions */
+  --brand: #6d6af8; /* Workflow Violet — links, buttons, focus */
+  --brand-foreground: #ffffff; /* text on brand surfaces */
+  --success: #a7e45c; /* Signal Green — success only, sparingly */
+  --success-foreground: #1b2d05;
+  --danger: #c0362c; /* error states only (not in the brand brief, but UX needs it) */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/*
+ * Dark theme. Kept ready for a future toggle but NOT active by default — the
+ * site is light unless `.dark` is set on <html>. To enable a toggle later:
+ * document.documentElement.classList.toggle("dark"). Brand + Signal Green stay
+ * constant across modes for recognisability.
+ */
+.dark {
+  color-scheme: dark;
+  --background: #0b0c0e;
+  --foreground: #ededed;
+  --surface: #16181c;
+  --border: #26282e;
+  --muted: #9aa0ab;
+  --danger: #f08a82;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Headlines use Space Grotesk, including inside MDX prose. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/*
+ * Tailwind v4 Preflight resets buttons to `cursor: default`. Restore the
+ * pointer for all interactive buttons by default; disabled buttons keep the
+ * not-allowed cursor.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Selection + focus pick up the brand colour, never a gradient. */
+::selection {
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
+/* Map Tailwind Typography onto our tokens so post content stays on-palette. */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted);
+  --tw-prose-links: var(--brand);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted);
+  --tw-prose-bullets: var(--border);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--muted);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--muted);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+/* rehype-pretty-code: tidy code blocks and inline code in prose. */
+.prose pre {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none; /* drop the default backtick quotes around inline code */
+}
+
+/* Smooth in-page jumps for the post table of contents (respect reduced motion). */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Headings are TOC anchor targets; keep a little breathing room above them so
+ * the jumped-to section doesn't sit flush against the viewport top. */
+.prose :is(h2, h3) {
+  scroll-margin-top: 1.5rem;
 }

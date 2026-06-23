@@ -1,0 +1,213 @@
+---
+title: "How This Ex-Meta L8 Engineer Ships 40+ Production PRs a Day Using AI Agents (No Manual Code Review)"
+description: "Kun ships 40 to 50 tested PRs a day and reviews almost none by hand. Here's the setup, the safety net, and the mindset behind it."
+date: "2026-06-22"
+tags: ["agents", "workflow", "tooling"]
+draft: true
+---
+
+40 to 50 production pull requests a day. No manual code review. If you write
+software for a living, that line should make you flinch. It sounds like a slop
+factory. It sounds like someone who stopped reading their own code and started
+hoping for the best.
+
+So I watched [his full walkthrough](https://www.youtube.com/watch?v=iQyg-KypKAA)
+to find out which it was.
+
+<YouTube id="iQyg-KypKAA" title="Kun's agent engineering workflow" />
+
+The number isn't the interesting part. The machine behind it is. And most of that
+machine is just good process, not magic.
+
+## Tools
+
+{/* TODO: replace "#" with real URLs. Kun's six tools are on his GitHub (need his
+handle); Open Super Whisper's repo link also needs confirming. */}
+
+<Tools
+  tools={[
+    { name: "no-mistakes", description: "Validation pipeline: takes first-pass agent code to a clean, tested PR.", url: "#" },
+    { name: "Lavish", description: "Visual, clickable planning artifacts instead of walls of text.", url: "#" },
+    { name: "treehouse", description: "Git worktree manager so parallel agents don't collide.", url: "#" },
+    { name: "goodnight-havefun", description: "Runs an agent in a loop for hours against a goal (overnight work).", url: "#" },
+    { name: "first-mate", description: "Orchestrates the whole crew of agents for you.", url: "#" },
+    { name: "AXI", description: "Tool-design standards that optimise for agent ergonomics.", url: "#" },
+    { name: "Claude Code", description: "Anthropic's terminal coding agent.", url: "https://github.com/anthropics/claude-code" },
+    { name: "Codex CLI", description: "OpenAI's open-source coding agent, written in Rust.", url: "https://github.com/openai/codex" },
+    { name: "opencode", description: "Model-agnostic terminal coding agent with a polished TUI.", url: "https://github.com/sst/opencode" },
+    { name: "WezTerm", description: "Cross-platform terminal emulator, configured in Lua.", url: "https://wezterm.org" },
+    { name: "tmux", description: "Terminal multiplexer for panes, tabs, and persistent sessions.", url: "https://github.com/tmux/tmux" },
+    { name: "Neovim", description: "Keyboard-driven modal text editor.", url: "https://neovim.io" },
+    { name: "Open Super Whisper", description: "Free, local speech-to-text for voice prompting.", url: "#" },
+  ]}
+/>
+
+## Who he is
+
+Kun spent years on big systems. The Bing search engine and Windows at Microsoft.
+Facebook games at Meta. He was a principal engineer, level L8. For the last couple
+of years he's built coding agents at Atlassian, and he builds heavily with them
+himself.
+
+He says the 40 to 50 PRs are all tested and shipped to production. Not the toy
+demos people post on social media. Real work. I can't verify the count, so take it
+as his. What's worth your time is how he gets there.
+
+## The one idea that makes the rest work
+
+Kun's core move is a change of mindset. He stopped thinking of himself as the
+engineer and started thinking of himself as the manager.
+
+His point is simple. AI writes code fast. If every change needs your eyes, then
+*you* are the bottleneck. You can only read so many diffs a day. A good
+engineering director doesn't review every line their team ships. They set up the
+checks and trust the team to run. Kun does the same with agents.
+
+He's right. But this is also where the risk hides. "No manual review" is only as
+safe as the checks you put in its place. So the real question is simple: what are
+the checks? The rest of his workflow is the answer.
+
+## His setup
+
+Kun does almost everything in the terminal, for two reasons, both about flow. His
+hands never leave the keyboard, so his brain never switches gears to reach for the
+mouse. And the same setup follows him everywhere.
+
+The stack: **WezTerm** as the terminal, because it runs the same on Mac, Windows,
+and Linux. **tmux** inside it, to split one terminal into many panes and tabs. And
+**Neovim** as the editor. The neat part is tmux's persistence. A session keeps
+running on the server, so he can shut his laptop, pick up his phone, reconnect to
+the same session, and carry on.
+
+He's clear this part is taste, not gospel. The ideas work fine in a normal app
+with a mouse. So if you love your mouse, keep it. Nothing below depends on the
+terminal.
+
+## Teaching a fresh agent
+
+A new agent knows nothing about how Kun works. He teaches it with two things:
+memory files and skills.
+
+The **global memory file** loads into every agent, on every project, so he keeps
+it tiny. His is 27 lines. Anything in here costs tokens on every request. He saves
+it for core rules, and a few are worth stealing:
+
+- Never use em dashes. Models love them, and once you notice, they read as robotic.
+- When you make a technical choice, don't weigh build time too heavily.
+- When you fix a bug, reproduce it end to end first, the way a real user hits it.
+  Not just a unit test.
+
+That second rule fixes a sneaky problem, and it's the best insight in the video.
+Ask a model how long a project will take. It says days or weeks, because it
+learned from human data. Then ask it to *build* the thing and it's done in
+minutes. The model doesn't know it codes faster than people. So it quietly assumes
+the proper solution costs too much, and nudges you toward the cheap, low-quality
+one. Kun's rule cancels that out. I hadn't thought about it that way before, and it
+rings true.
+
+The **project memory file** is the opposite. It's long, and it grows. Every time
+an agent gets something wrong, he corrects it and tells it to save the lesson. Over
+time that file becomes the shared brain of every agent on the repo. No fancy
+database. Just a markdown file that gets smarter.
+
+To stop that file getting fat, he moves the "only sometimes" stuff into **skills**.
+The end-to-end testing steps, say, only matter when an agent changes code. A skill
+loads just its one-line description up front, and the full thing loads only when
+the agent needs it.
+
+One warning he repeats: don't install random skills off the internet, even popular
+ones. A skill can run anything on your machine, so a bad one can leak your keys.
+And popular doesn't mean good. He tested a skill from a repo with 177,000 GitHub
+stars. It made the agent use 5% more tokens *and* gave worse results. Stars
+measure popularity, not quality.
+
+## Working with one agent
+
+Two habits do most of the work.
+
+He talks instead of types. Most of his prompts are voice now, turned into text on
+his own machine by a free app called Open Super Whisper. He cites a Stanford paper
+that says speech is about three times faster than typing. The only thing he still
+types is stuff you'd never say out loud, like a URL or a file path. I haven't
+tested the three-times claim, so treat it as his, but the direction is obviously
+right.
+
+And he plans with pictures, not walls of text. When you ask an agent to plan a
+feature, it usually hands back a long block of text. It's hard to read, and harder
+to point at. So Kun built a tool called **Lavish**. Instead of text, the agent
+builds a small web page that shows the options, using the real design of the app
+he's working on. He can see roughly what each choice looks like, click, and leave
+notes right on it. For UI work, looking at the thing beats reading about the thing.
+I buy this completely.
+
+## The pipeline that replaces code review
+
+This is the part the headline is really about. When the agent says it's done, Kun
+doesn't open the diff. He runs a pipeline he built called **no-mistakes**.
+
+The review still happens. A second agent does it, in a fresh context, with a clear
+process. Roughly, no-mistakes:
+
+1. Creates a branch and a commit.
+2. Works in an isolated git worktree, so nothing touches the live repo.
+3. Reads the agent session to work out what he *actually* wanted.
+4. Rebases onto the latest `main` and clears merge conflicts up front.
+5. Runs an adversarial review in a fresh context window. This is where most
+   problems get caught. It fixes the obvious ones itself and sends the judgement
+   calls up to a human.
+6. Tests the change end to end and records proof it works: a screenshot, a video,
+   a log.
+7. Updates docs, fixes lint, pushes, and opens the PR.
+8. Babysits the PR until it merges, handling new conflicts and CI failures.
+
+The PR that comes out has the original intent, what changed, how it was tested, the
+proof, and a risk level. Kun uses that risk level to decide how hard to look. Low
+risk, he trusts the pipeline and skips the diff. Higher risk, he reads it.
+
+This is the load-bearing wall of the whole system. "I don't review code" really
+means "I moved the review into a pipeline and I spot-check the risky changes."
+That's a much more defensible claim. How safe it is for *your* code depends on how
+good that review and end-to-end test really are. For a kids' app, fine. For a
+payments system, I'd want to see the proof first.
+
+## Running a fleet
+
+Once the middle of each task runs without him, Kun runs many at once. Three more
+tools handle the mess. **treehouse** spins up a fresh git worktree per task so
+parallel agents don't collide, and reuses idle ones so he never cleans them up by
+hand. **goodnight-havefun** runs one agent in a loop for hours against a goal, with
+limits on tokens, loops, and when to stop. And **first-mate** sits above
+everything: he talks to it, and it spins up the tabs, calls treehouse, runs the
+agents, and runs no-mistakes on each one.
+
+He's honest about why first-mate exists. Juggling ten agents by hand wears you
+down. The constant switching is exhausting. first-mate is the manager of the
+managers, so he can think about where to go next.
+
+His overnight example is the one that stuck with me. He points an agent at his app
+and tells it: pretend you're a seven-year-old, use the app, find the first thing
+that confuses you, fix it, repeat. Then he goes to sleep. In the morning he's got a
+branch of commits to pick from. It's a genuinely good use of a machine that
+doesn't get bored.
+
+## What I take from it
+
+I went in expecting a slop factory and found a process. That's the headline. Strip
+away the tools, most of which are Kun's own, and the core is solid:
+
+- Stop being the bottleneck. Move the review into a process. Spot-check by risk.
+- Keep global memory tiny, let project memory grow, push the rest into skills.
+- Plan with something you can see and point at, not a wall of text.
+- Trust the agent in the middle of a task. Hold the bar hard at the start and end.
+
+What I wouldn't swallow whole: the exact numbers. The 40 to 50 PRs, the
+three-times-faster voice claim, the precise token savings. They're his figures from
+his setup, and most aren't checked here. The PR count is also a vanity metric.
+Forty small, low-risk PRs is not forty hard problems solved.
+
+But the shape is right. The hard part of building with AI is shifting. It used to
+be writing the code. Now it's deciding what's worth building. Kun's whole system is
+a bet on that, and it's the same bet this blog keeps making. The tools will change
+next month. The mindset is the part worth keeping.
+
+{/* TODO: add Kun's GitHub + channel links once confirmed. Tools named: lavish, no-mistakes, treehouse, goodnight-havefun, first-mate, AXI */}

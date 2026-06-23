@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Non Slop AI
 
-## Getting Started
+A blog + newsletter about building with AI without the slop.
 
-First, run the development server:
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · MDX · Resend
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in values
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Writing posts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Posts are MDX files in `content/posts/<slug>.mdx` with YAML frontmatter:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```yaml
+---
+title: "A specific, claim-making title"
+description: "One sentence with an actual point, for SEO + RSS."
+date: "2026-06-22"        # YYYY-MM-DD (required)
+tags: ["writing", "ai"]   # optional
+draft: false              # optional; drafts are hidden in production
+author: "Tom Mitchell"    # optional
+image: "/og/custom.png"   # optional; overrides the generated OG image
+---
+```
 
-## Learn More
+Frontmatter is validated by a Zod schema in `src/lib/posts.ts` — the build fails
+if a post drifts from the shape. You can use GitHub-flavored markdown, fenced
+code blocks (syntax-highlighted), and the `<Callout>` component in any post.
 
-To learn more about Next.js, take a look at the following resources:
+### Authoring with Claude
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This repo ships slash commands for the writing workflow:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/new-post <topic>` — scaffold a new post with valid frontmatter
+- `/humanize <slug>` — de-slop a draft using the humanizer skill
+- `/seo <slug>` — refine title, description, tags, and slug
 
-## Deploy on Vercel
+## Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- MDX rendering via `next-mdx-remote/rsc` (GFM, heading anchors, code highlight)
+- Per-post SEO metadata, JSON-LD, and a generated Open Graph image
+- `sitemap.xml`, `robots.txt`, and an RSS feed at `/feed.xml`
+- Newsletter signup wired to a Resend audience (`/api/subscribe`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Configuration
+
+Edit `src/lib/site.ts` for name, URL, author, and nav. Set environment
+variables in `.env.local` (see `.env.example`):
+
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL (no trailing slash) |
+| `RESEND_API_KEY` | Resend API key for newsletter signups |
+| `RESEND_AUDIENCE_ID` | Resend audience to add subscribers to |
+
+## Scripts
+
+```bash
+npm run dev     # local dev
+npm run build   # production build
+npm run start   # serve the production build
+npm run lint    # eslint
+```
+
+## Deployment
+
+Host-agnostic. Deploys to Vercel with zero config; works on any Node host or
+Cloudflare via OpenNext. Set the environment variables above in your host.
