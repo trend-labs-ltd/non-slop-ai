@@ -77,14 +77,10 @@ export function Tools({ names }: { names: ToolRef[] }) {
   const resolved = names.map(resolveTool);
   return (
     <ul className="not-prose my-6 grid gap-3 sm:grid-cols-2">
-      {resolved.map((tool) => (
-        <li key={tool.name}>
-          <a
-            href={tool.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-full items-start gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-brand"
-          >
+      {resolved.map((tool) => {
+        const hasLink = Boolean(tool.url) && tool.url !== "#";
+        const body = (
+          <>
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background">
               {iconFor(tool)}
             </span>
@@ -96,9 +92,27 @@ export function Tools({ names }: { names: ToolRef[] }) {
                 {tool.description}
               </span>
             </span>
-          </a>
-        </li>
-      ))}
+          </>
+        );
+        return (
+          <li key={tool.name}>
+            {hasLink ? (
+              <a
+                href={tool.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-full items-start gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-brand"
+              >
+                {body}
+              </a>
+            ) : (
+              <div className="flex h-full items-start gap-3 rounded-lg border border-border bg-surface p-3">
+                {body}
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
