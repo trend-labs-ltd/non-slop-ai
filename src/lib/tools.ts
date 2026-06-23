@@ -63,6 +63,44 @@ export const tools: Record<string, Tool> = {
     url: "https://neovim.io",
     logo: "/logos/neovim.svg",
   },
+
+  // Kun Chen's agent tooling (github.com/kunchenguid). GitHub repos with no
+  // brand logo, so they fall back to the GitHub mark.
+  "no-mistakes": {
+    name: "no-mistakes",
+    description: "Validation pipeline: takes first-pass agent code to a clean, tested PR.",
+    url: "https://github.com/kunchenguid/no-mistakes",
+  },
+  lavish: {
+    name: "Lavish",
+    description: "Visual, clickable planning artifacts instead of walls of text.",
+    url: "https://github.com/kunchenguid/lavish-axi",
+  },
+  treehouse: {
+    name: "treehouse",
+    description: "Git worktree manager so parallel agents don't collide.",
+    url: "https://github.com/kunchenguid/treehouse",
+  },
+  "goodnight-havefun": {
+    name: "goodnight-havefun",
+    description: "Runs an agent in a loop for hours against a goal (overnight work).",
+    url: "https://github.com/kunchenguid/gnhf",
+  },
+  "first-mate": {
+    name: "first-mate",
+    description: "Orchestrates the whole crew of agents for you.",
+    url: "https://github.com/kunchenguid/firstmate",
+  },
+  axi: {
+    name: "AXI",
+    description: "Tool-design standards that optimise for agent ergonomics.",
+    url: "https://github.com/kunchenguid/axi",
+  },
+  "open-super-whisper": {
+    name: "Open Super Whisper",
+    description: "Free, local speech-to-text for voice prompting.",
+    url: "https://github.com/Starmel/OpenSuperWhisper",
+  },
 };
 
 /** Look up a tool by slug. */
