@@ -1,0 +1,98 @@
+# listmonk stack. Used unchanged in dev and prod — environment differences
+# come entirely from .env values and which profile is active, not separate
+# files. Set COMPOSE_PROFILES=dev or COMPOSE_PROFILES=prod in .env; the run
+# command is always just: docker compose up -d
+#
+#   dev profile:  adds Mailpit (catches mail locally, UI at :8025)
+#   prod profile: adds Caddy (TLS termination for LISTMONK_HOSTNAME)
+#
+# See .env.example for the variables this file reads.
+
+x-db-credentials: &db-credentials
+  POSTGRES_USER: &db-user listmonk
+  POSTGRES_PASSWORD: &db-password ${LISTMONK_DB_PASSWORD:-listmonk}
+  POSTGRES_DB: &db-name listmonk
+
+services:
+  app:
+    image: listmonk/listmonk:latest
+    restart: unless-stopped
+    hostname: ${LISTMONK_HOSTNAME:-listmonk.localhost}
+    ports:
+      - "9000:9000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # --install --idempotent runs schema setup only on a fresh DB;
+    # --upgrade applies any pending migrations on every start.
+    # --static-dir overlays our customized templates (currently just the
+    # email base wrapper, to drop the "Powered by listmonk" footer from
+    # system emails) on top of listmonk's embedded defaults — anything not
+    # present under static/ falls back to the built-in version. Deliberately
+    # scoped to email-templates/ only; see static/email-templates/base.html
+    # for why we're not overlaying static/public/ too.
+    command: [sh, -c, "./listmonk --install --idempotent --yes --config '' --static-dir=/listmonk-static && ./listmonk --upgrade --yes --config '' --static-dir=/listmonk-static && ./listmonk --config '' --static-dir=/listmonk-static"]
+    environment:
+      LISTMONK_app__address: 0.0.0.0:9000
+      LISTMONK_db__user: *db-user
+      LISTMONK_db__password: *db-password
+      LISTMONK_db__database: *db-name
+      LISTMONK_db__host: db
+      LISTMONK_db__port: 5432
+      LISTMONK_db__ssl_mode: disable
+      TZ: Etc/UTC
+      # If set, the super admin is created automatically on first boot.
+      # Leave unset locally and create it through the web UI instead.
+      LISTMONK_ADMIN_USER: ${LISTMONK_ADMIN_USER:-}
+      LISTMONK_ADMIN_PASSWORD: ${LISTMONK_ADMIN_PASSWORD:-}
+    volumes:
+      - listmonk-uploads:/listmonk/uploads
+      - ./static:/listmonk-static:ro
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      <<: *db-credentials
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U listmonk"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - listmonk-data:/var/lib/postgresql/data
+
+  # Fake SMTP server + web UI for local dev — point listmonk's SMTP settings
+  # at it (host "mailpit", port 1025, no auth/TLS) to see real opt-in /
+  # campaign emails rendered without sending anything out. UI at :8025.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    profiles: ["dev"]
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  # Terminates TLS for LISTMONK_HOSTNAME and proxies to the app — no
+  # Caddyfile needed for a single-domain setup.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: ["prod"]
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    command: ["caddy", "reverse-proxy", "--from", "${LISTMONK_HOSTNAME}", "--to", "app:9000"]
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  listmonk-data:
+  listmonk-uploads:
+  caddy-data:
+  caddy-config:

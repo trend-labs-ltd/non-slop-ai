@@ -19,7 +19,6 @@
     "rehype-pretty-code": "^0.14.3",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "resend": "^6.14.0",
     "shiki": "^4.2.0",
     "zod": "^4.4.3"
   },

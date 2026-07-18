@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -12,17 +13,27 @@ export function NewsletterForm({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
+  const path = usePathname();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
     setMessage("");
 
+    const params = new URLSearchParams(window.location.search);
+
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          path,
+          variant,
+          utm_source: params.get("utm_source") ?? undefined,
+          utm_medium: params.get("utm_medium") ?? undefined,
+          utm_campaign: params.get("utm_campaign") ?? undefined,
+        }),
       });
       const data = (await res.json()) as { message?: string };
 
