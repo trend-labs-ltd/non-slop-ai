@@ -25,13 +25,21 @@ services:
         condition: service_healthy
     # --install --idempotent runs schema setup only on a fresh DB;
     # --upgrade applies any pending migrations on every start.
-    # --static-dir overlays our customized templates (currently just the
-    # email base wrapper, to drop the "Powered by listmonk" footer from
-    # system emails) on top of listmonk's embedded defaults — anything not
-    # present under static/ falls back to the built-in version. Deliberately
-    # scoped to email-templates/ only; see static/email-templates/base.html
-    # for why we're not overlaying static/public/ too.
-    command: [sh, -c, "./listmonk --install --idempotent --yes --config '' --static-dir=/listmonk-static && ./listmonk --upgrade --yes --config '' --static-dir=/listmonk-static && ./listmonk --config '' --static-dir=/listmonk-static"]
+    # --static-dir overlays our customized templates (email base wrapper,
+    # to drop the "Powered by listmonk" footer; opt-in email, to link
+    # straight to our own /api/confirm instead of listmonk's own
+    # click-through page) on top of listmonk's embedded defaults — anything
+    # not present under static/ falls back to the built-in version.
+    # Deliberately scoped to email-templates/ only; see
+    # static/email-templates/base.html for why we're not overlaying
+    # static/public/ too.
+    #
+    # The mounted static/ dir is read-only, so we copy it to a scratch dir
+    # first and substitute __SITE_URL__ (the opt-in email's confirm link
+    # target) with NEXT_PUBLIC_SITE_URL — the one place this compose file
+    # needs to know the Next.js site's own URL, since Go templates can't
+    # read env vars themselves.
+    command: [sh, -c, "cp -r /listmonk-static /tmp/listmonk-static && find /tmp/listmonk-static -type f -exec sed -i \"s|__SITE_URL__|${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}|g\" {} + && ./listmonk --install --idempotent --yes --config '' --static-dir=/tmp/listmonk-static && ./listmonk --upgrade --yes --config '' --static-dir=/tmp/listmonk-static && ./listmonk --config '' --static-dir=/tmp/listmonk-static"]
     environment:
       LISTMONK_app__address: 0.0.0.0:9000
       LISTMONK_db__user: *db-user
