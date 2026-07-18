@@ -3,7 +3,8 @@
 # files. Set COMPOSE_PROFILES=dev or COMPOSE_PROFILES=prod in .env; the run
 # command is always just: docker compose up -d
 #
-#   dev profile:  adds Mailpit (catches mail locally, UI at :8025)
+#   dev profile:  adds Mailpit (catches mail locally, UI at :8025) and MinIO
+#                 (S3-compatible media storage, mirrors prod's Cloudflare R2)
 #   prod profile: adds Caddy (TLS termination for LISTMONK_HOSTNAME)
 #
 # See .env.example for the variables this file reads.
@@ -83,6 +84,44 @@ services:
       - "8025:8025"
       - "1025:1025"
 
+  # S3-compatible media storage for local dev — mirrors prod's Cloudflare R2
+  # (listmonk's S3 media provider works unchanged against either). Console
+  # UI at :9003 (login with the credentials below). API on :9002 host-side
+  # to avoid clashing with listmonk's own :9000.
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    profiles: ["dev"]
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # One-shot: creates the dev media bucket and makes it public-read, then
+  # exits. MinIO itself has no "create this bucket on boot" option.
+  minio-init:
+    image: minio/mc:latest
+    profiles: ["dev"]
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - >
+        mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin} &&
+        mc mb --ignore-existing local/${MINIO_BUCKET:-nonslop-dev} &&
+        mc anonymous set download local/${MINIO_BUCKET:-nonslop-dev}
+
   # Terminates TLS for LISTMONK_HOSTNAME and proxies to the app — no
   # Caddyfile needed for a single-domain setup.
   caddy:
@@ -102,5 +141,6 @@ services:
 volumes:
   listmonk-data:
   listmonk-uploads:
+  minio-data:
   caddy-data:
   caddy-config:

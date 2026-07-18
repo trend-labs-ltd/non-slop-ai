@@ -14,7 +14,7 @@
 </ul>
 <p>{{ L.Ts "email.optin.confirmSubHelp" }}</p>
 <p>
-    <a href="__SITE_URL__/api/confirm?u={{ .Subscriber.UUID }}" class="button">{{ L.Ts "email.optin.confirmSub" }}</a>
+    <a href="__SITE_URL__/api/confirm?u={{ .Subscriber.UUID }}&e={{ .Subscriber.Email }}" class="button">{{ L.Ts "email.optin.confirmSub" }}</a>
 </p>
 <a href="{{ .UnsubURL }}?manage=true">{{ L.T "email.unsub" }}</a>
 
