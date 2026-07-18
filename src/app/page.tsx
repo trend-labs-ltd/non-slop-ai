@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
-import { PostCard } from "@/components/post-card";
+import { getAllBriefings } from "@/lib/briefings";
+import { BriefingCard } from "@/components/briefing-card";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { Container } from "@/components/container";
 
 export default function Home() {
-  const posts = getAllPosts().slice(0, 5);
-  const latest = posts[0];
+  const briefings = getAllBriefings().slice(0, 5);
+  const latest = briefings[0];
 
   return (
     <>
@@ -14,12 +14,12 @@ export default function Home() {
       <section className="bg-brand text-brand-foreground">
         <Container className="flex flex-col items-center pt-32 pb-24 text-center sm:pt-40 sm:pb-32">
           <h1 className="max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
-            Find the AI workflows that actually earn their hype.
+            The AI news your workday actually needs.
           </h1>
 
           <p className="mt-5 max-w-xl text-lg text-brand-foreground/80 sm:text-xl">
-            Every week, one workflow from the people getting the most out of
-            AI. Broken down so you can run it yourself.
+            A short daily briefing on what changed in AI and why it matters
+            for your business. No hype, no padding, five minutes tops.
           </p>
 
           <div className="mt-9 w-full">
@@ -31,11 +31,11 @@ export default function Home() {
 
           {latest && (
             <Link
-              href={`/blog/${latest.slug}`}
+              href={`/news/${latest.slug}`}
               className="group mt-8 inline-flex max-w-full items-center gap-3 rounded-full border border-brand-foreground/20 bg-brand-foreground/10 py-1.5 pl-1.5 pr-4 text-sm transition-colors hover:bg-brand-foreground/15"
             >
               <span className="shrink-0 rounded-full bg-brand-foreground px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand">
-                This week
+                Today
               </span>
               <span className="min-w-0 truncate text-brand-foreground/90">
                 {latest.frontmatter.title}
@@ -51,29 +51,29 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* Latest writing — back to the comfortable reading column. */}
+      {/* Latest news — back to the comfortable reading column. */}
       <Container size="prose" className="py-20">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            Latest writing
+            Latest news
           </h2>
           <Link
-            href="/blog"
+            href="/news"
             className="text-sm font-medium text-brand transition-opacity hover:opacity-80"
           >
-            All posts →
+            All news →
           </Link>
         </div>
 
-        {posts.length === 0 ? (
+        {briefings.length === 0 ? (
           <p className="mt-6 text-muted">
-            No posts yet. Run <code>/new-post</code> to write the first one.
+            No briefings yet. Run <code>/new-post</code> to write the first one.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-border">
-            {posts.map((post) => (
-              <li key={post.slug}>
-                <PostCard post={post} />
+            {briefings.map((briefing) => (
+              <li key={briefing.slug}>
+                <BriefingCard briefing={briefing} />
               </li>
             ))}
           </ul>

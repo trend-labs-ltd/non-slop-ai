@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import type { Heading } from "@/lib/toc";
 
 /**
- * Sticky "On this page" timeline shown on the left of a post. Anchor links jump
- * (smoothly, via globals.css) to each section; an IntersectionObserver lights up
- * the dot for whichever section is currently near the top of the viewport.
+ * Sticky "On this page" timeline shown on the left of a briefing. Anchor links
+ * jump (smoothly, via globals.css) to each section; an IntersectionObserver
+ * lights up the dot for whichever section is currently near the top of the
+ * viewport.
  */
-export function PostToc({ headings }: { headings: Heading[] }) {
+export function BriefingToc({ headings }: { headings: Heading[] }) {
   const [active, setActive] = useState<string>(headings[0]?.id ?? "");
 
   useEffect(() => {

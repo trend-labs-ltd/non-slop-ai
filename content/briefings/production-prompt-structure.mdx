@@ -1,0 +1,149 @@
+---
+title: "Prompting 101: how to structure a production prompt"
+description: "Anthropic's applied team built one prompt from a wrong guess to a confident verdict. Learn the part-by-part structure that makes a prompt production-ready."
+date: "2026-06-23"
+tags: ["prompting", "prompt-engineering", "claude"]
+draft: true
+---
+
+A toy prompt and a production prompt look the same. A few lines of English, a
+question, a model. The gap between them is structure.
+
+I watched Anthropic's [Prompting 101 talk](https://www.youtube.com/watch?v=ysPbXH0LpIE)
+to see that gap up close. Two engineers from their applied AI team build one
+prompt on stage and fix it, version by version, until it works.
+
+<YouTube id="ysPbXH0LpIE" title="Prompting 101 | Code w/ Claude" />
+
+The task is real. They borrowed it from a customer and changed the details.
+
+## The job: who caused the crash
+
+You work for a Swedish car insurance firm. Every claim comes with two images. One
+is a form with 17 checkboxes describing the accident. The other is a rough sketch
+the driver drew by hand. Claude has to read both and say which driver was at
+fault.
+
+## Version 1: a skiing accident
+
+The first prompt is one lazy line. It tells Claude to review an accident report
+and decide who is at fault. That is it.
+
+Claude reads the images and decides it is a skiing accident on some Swedish
+street. There are no skis anywhere. The mistake is not stupid. Nobody told Claude
+this was about cars. With nothing to go on, it guessed.
+
+That's the whole lesson in one go. The model fills empty space with guesses.
+Your job is to leave less empty space.
+
+## The structure that fixed it
+
+Anthropic build prompts to a fixed shape. They walked through ten parts:
+
+```text
+1.  Task context        - who Claude is, what it's doing
+2.  Tone context        - how it should sound and behave
+3.  Background data      - the stuff that never changes
+4.  Detailed rules       - step-by-step instructions
+5.  Examples             - worked cases (few-shot)
+6.  Conversation history - prior turns, if any
+7.  The immediate task   - what to do right now
+8.  Think step by step   - tell it to reason in order
+9.  Output format        - how the answer should look
+10. Prefilled response   - the first tokens of the answer
+```
+
+You will not need every part every time. This demo used about half. Here are the
+ones that mattered.
+
+### Set the task and the tone
+
+They told Claude its role: help a human claims adjuster review Swedish accident
+forms. Then they set the tone: stay factual, stay confident, do not guess.
+
+That last bit matters more than it sounds. "Do not guess" is what later stops
+Claude inventing a checked box that is not there.
+
+### Put the unchanging stuff in the system prompt
+
+The form never changes. Same title, two columns for the two cars, the same 17
+rows in Swedish. Only the ticks change between claims.
+
+So they described the whole form once, in the system prompt. Two wins. Claude
+stops working out what the form is on every call, so it reads faster and better.
+And because that block never changes, you can cache it with prompt caching and
+cut your cost.
+
+### Wrap content in XML tags
+
+Claude was trained on a lot of XML, so it reads tags well. You put the form in
+one set of tags and the sketch in another. Now Claude can tell the two apart and
+refer back to each by name later in the prompt.
+
+### Order matters
+
+They told Claude to read the form first, then the sketch. This is how you would
+do it too.
+
+The sketch on its own is just boxes and lines. You cannot tell what it means. But
+read the form first, learn it is a car crash with these boxes ticked, and the
+drawing suddenly makes sense. Get the facts, then read the picture against them.
+
+### Show it hard examples
+
+For the tricky claims, you give Claude worked examples: the images, plus the
+right answer a human already worked out. You can base64 the example images
+straight into the prompt. A real insurance build might carry tens or hundreds of
+these. They teach Claude how to handle the cases that sit in the grey.
+
+### Remind it at the end, and only let it answer when sure
+
+Right before the task, they repeat the rules that matter most. Answer only when
+confident. Back every claim with the box you read it from. If the sketch is too
+messy to read, say so instead of guessing.
+
+This is the anti-hallucination step. You're giving Claude permission to say "I
+don't know," which beats a confident wrong answer.
+
+### Format the output for the next system
+
+A data engineer does not want Claude's reasoning. They want the verdict in a
+database. So they ask Claude to wrap its final answer in `<final_verdict>` tags,
+and ignore the rest. You can push this further with a prefilled response: start
+Claude's reply with a `{` or an open tag so it has to return clean JSON.
+
+### Use extended thinking as a crutch
+
+Claude 4 can show its working in a scratchpad before it answers. Turn that on and
+read how it reasons through the boxes. Where it goes wrong, you can fold the fix
+back into your prompt. It's a debugging tool for your own instructions.
+
+## Steal the structure
+
+Here's the skeleton, stripped down. Fill the parts you need and drop the rest.
+
+```text
+[SYSTEM]
+You are <role>. <Tone: factual, confident, no guessing.>
+<Background: the things that never change, in XML tags.>
+<Examples of hard cases and their correct answers.>
+
+[USER]
+<Dynamic content, in XML tags.>
+Steps:
+1. Do X first. 2. Then Y. 3. Only then decide Z.
+Reminder: answer only if confident; cite your evidence.
+Output: wrap the verdict in <final_verdict> tags.
+```
+
+## What I take from it
+
+The prompt went from "skiing accident" to a clean, confident, machine-readable
+verdict. Nothing in that jump was clever. It was just structure, in the right
+order, with the gaps filled in.
+
+Most "the model is bad at this" problems are really missing-context problems. The
+fix is usually in your prompt, not the model.
+
+TODO: confirm the exact Claude model named on stage (auto-captions garbled it).
+TODO: consider a screenshot of the v1 vs final console output if rights allow.

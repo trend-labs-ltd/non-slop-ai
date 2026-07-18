@@ -3,8 +3,8 @@ import GithubSlugger from "github-slugger";
 export type Heading = { id: string; text: string; level: number };
 
 /**
- * Pull the section headings out of a post's MDX body so we can build a table of
- * contents. Ids are generated with `github-slugger` — the same slugger
+ * Pull the section headings out of a briefing's MDX body so we can build a
+ * table of contents. Ids are generated with `github-slugger` — the same slugger
  * `rehype-slug` uses when rendering — so the `#anchor` links line up exactly.
  *
  * Fenced code blocks are skipped so a `# comment` inside a snippet isn't

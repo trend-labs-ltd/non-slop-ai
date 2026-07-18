@@ -1,12 +1,12 @@
 ---
-description: De-slop a draft post using the humanizer skill
-argument-hint: <post slug>
+description: De-slop a draft briefing using the humanizer skill
+argument-hint: <briefing slug>
 allowed-tools: Read, Edit, Skill, Bash(ls:*)
 ---
 
-De-slop the post at `content/posts/$ARGUMENTS.mdx`.
+De-slop the briefing at `content/briefings/$ARGUMENTS.mdx`.
 
-1. Read `STYLE.md` (repo root) and the post body (the MDX below the frontmatter —
+1. Read `STYLE.md` (repo root) and the briefing body (the MDX below the frontmatter —
    leave frontmatter alone except for keeping `title`/`description` honest).
 2. Invoke the **humanizer** skill on the prose and apply its guidance: strip
    inflated symbolism, promotional language, rule-of-three filler, negative

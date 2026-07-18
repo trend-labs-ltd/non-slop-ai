@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 /**
  * Opt-in width constraint. Pages are full-bleed by default; wrap content in a
  * Container to constrain it.
- * - `prose`: ~768px, the comfortable reading column (blog, docs).
+ * - `prose`: ~768px, the comfortable reading column (news, docs).
  * - `wide`:  ~1152px, for marketing/landing layouts and site chrome.
  * - `full`:  no max width (use when you only want the horizontal padding).
  */

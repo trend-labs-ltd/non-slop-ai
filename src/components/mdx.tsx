@@ -8,9 +8,9 @@ import rehypePrettyCode from "rehype-pretty-code";
 import { Tools } from "./tools";
 
 /**
- * Components made available to every MDX post. Authors can use `<Callout>` and
- * `<Aside>` directly in `.mdx` files; the HTML overrides below keep prose links
- * and rules on-brand.
+ * Components made available to every MDX briefing. Authors can use `<Callout>`
+ * and `<Aside>` directly in `.mdx` files; the HTML overrides below keep prose
+ * links and rules on-brand.
  */
 const components: MDXComponents = {
   a: ({ href = "", children, ...props }) => {
@@ -67,8 +67,9 @@ const mdxOptions = {
   },
   // Allow JSX expression attributes in MDX (e.g. arrays/objects passed to
   // <ProfileCard stats={[...]} />). next-mdx-remote defaults blockJS:true, which
-  // strips every expression attribute. Our post content is first-party/trusted;
-  // blockDangerousJS stays on by default as a backstop against eval/Function/etc.
+  // strips every expression attribute. Our briefing content is first-party/
+  // trusted; blockDangerousJS stays on by default as a backstop against
+  // eval/Function/etc.
   blockJS: false,
 } as const;
 

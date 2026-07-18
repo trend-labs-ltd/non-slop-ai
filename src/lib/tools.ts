@@ -1,9 +1,9 @@
 /**
- * Central registry of tools referenced across posts.
+ * Central registry of tools referenced across briefings.
  *
- * Posts reference tools by slug — `<Tools names={["claude-code", ...]} />` —
+ * Briefings reference tools by slug — `<Tools names={["claude-code", ...]} />` —
  * and pick up the canonical name, URL, description, and logo from here. This is
- * the single source of truth: update a tool once and every post follows.
+ * the single source of truth: update a tool once and every briefing follows.
  *
  * Logos live in `public/logos/`. When a tool has no `logo`, the <Tools>
  * component falls back to the site's favicon (or the GitHub mark for repos).

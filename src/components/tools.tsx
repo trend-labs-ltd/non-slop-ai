@@ -1,9 +1,9 @@
 import { getTool, type Tool } from "@/lib/tools";
 
 /**
- * What a post can pass in the `names` array:
+ * What a briefing can pass in the `names` array:
  *  - a string slug into the tool registry — `"claude-code"`
- *  - a slug with a per-post description override — `{ slug, description }`
+ *  - a slug with a per-briefing description override — `{ slug, description }`
  *  - a fully inline one-off not worth registering — `{ name, url, description }`
  */
 type ToolRef =

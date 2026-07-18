@@ -15,13 +15,14 @@ export default function AboutPage() {
       <div className="prose max-w-none prose-a:font-medium">
         <h1>About</h1>
         <p>
-          {site.name} is written by {site.author.name}. It&apos;s about building
-          with AI without producing the kind of writing that AI is famous for —
-          padded, hedged, and saying nothing.
+          {site.name} is a daily AI briefing written by {site.author.name} for
+          people who have to make the call at work — what to adopt, what to
+          ignore, what to tell the board. It skips the padded, hedged writing
+          that AI coverage is famous for.
         </p>
         <p>
-          Expect practical write-ups, opinions worth disagreeing with, and code
-          you can actually run. New posts go out by email; sign up below.
+          Expect a short read, a real claim, and a reason to believe it. New
+          briefings go out by email, most weekdays; sign up below.
         </p>
         <p>
           Questions or corrections?{" "}

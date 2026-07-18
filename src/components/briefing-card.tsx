@@ -1,12 +1,12 @@
 import Link from "next/link";
-import type { Post } from "@/lib/posts";
+import type { Briefing } from "@/lib/briefings";
 import { formatDate } from "@/lib/format";
 
-export function PostCard({ post }: { post: Post }) {
-  const { slug, frontmatter, readingTimeMinutes } = post;
+export function BriefingCard({ briefing }: { briefing: Briefing }) {
+  const { slug, frontmatter, readingTimeMinutes } = briefing;
   return (
     <article className="group">
-      <Link href={`/blog/${slug}`} className="block py-6">
+      <Link href={`/news/${slug}`} className="block py-6">
         <div className="flex items-center gap-3 text-xs text-muted">
           <time dateTime={frontmatter.date}>{formatDate(frontmatter.date)}</time>
           <span aria-hidden>·</span>

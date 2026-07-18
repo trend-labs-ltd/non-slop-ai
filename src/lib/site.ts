@@ -5,9 +5,9 @@
 export const site = {
   name: "Non Slop AI",
   // Short tagline used in the header and as a metadata fallback.
-  tagline: "Deep, practical interviews with builders shipping real AI work.",
+  tagline: "The daily AI briefing for people who have to make the call at work.",
   description:
-    "In-depth interviews and writing about building with AI. Real workflows, agentic engineering, lessons from people that use AI to benefit daily.",
+    "A daily newsletter on what's happening in AI, written for people who make decisions at work. What changed, why it matters, no padding.",
   // No trailing slash. Override per-environment with NEXT_PUBLIC_SITE_URL.
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://nonslopai.com").replace(
     /\/$/,
@@ -19,7 +19,7 @@ export const site = {
     email: "tom@nonslopai.com",
   },
   nav: [
-    { label: "Posts", href: "/blog" },
+    { label: "News", href: "/news" },
     { label: "About", href: "/about" },
   ],
 } as const;

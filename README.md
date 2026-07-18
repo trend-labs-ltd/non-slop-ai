@@ -1,6 +1,6 @@
 # Non Slop AI
 
-A blog + newsletter about building with AI without the slop.
+A daily AI newsletter, without the slop.
 
 Next.js 16 (App Router) · TypeScript · Tailwind v4 · MDX · Resend
 
@@ -12,9 +12,9 @@ cp .env.example .env.local   # then fill in values
 npm run dev                  # http://localhost:3000
 ```
 
-## Writing posts
+## Writing briefings
 
-Posts are MDX files in `content/posts/<slug>.mdx` with YAML frontmatter:
+Briefings are MDX files in `content/briefings/<slug>.mdx` with YAML frontmatter:
 
 ```yaml
 ---
@@ -28,22 +28,23 @@ image: "/og/custom.png"   # optional; overrides the generated OG image
 ---
 ```
 
-Frontmatter is validated by a Zod schema in `src/lib/posts.ts` — the build fails
-if a post drifts from the shape. You can use GitHub-flavored markdown, fenced
-code blocks (syntax-highlighted), and the `<Callout>` component in any post.
+Frontmatter is validated by a Zod schema in `src/lib/briefings.ts` — the build
+fails if a briefing drifts from the shape. You can use GitHub-flavored
+markdown, fenced code blocks (syntax-highlighted), and the `<Callout>`
+component in any briefing.
 
 ### Authoring with Claude
 
 This repo ships slash commands for the writing workflow:
 
-- `/new-post <topic>` — scaffold a new post with valid frontmatter
+- `/new-post <topic>` — scaffold a new briefing with valid frontmatter
 - `/humanize <slug>` — de-slop a draft using the humanizer skill
 - `/seo <slug>` — refine title, description, tags, and slug
 
 ## Features
 
 - MDX rendering via `next-mdx-remote/rsc` (GFM, heading anchors, code highlight)
-- Per-post SEO metadata, JSON-LD, and a generated Open Graph image
+- Per-briefing SEO metadata, JSON-LD, and a generated Open Graph image
 - `sitemap.xml`, `robots.txt`, and an RSS feed at `/feed.xml`
 - Newsletter signup wired to a Resend audience (`/api/subscribe`)
 

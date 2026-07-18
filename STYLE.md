@@ -2,15 +2,25 @@
 
 This is the voice guide. The editorial bar in `CLAUDE.md` says what to *avoid*
 (slop). This says what to *aim for* (voice, reader, reading level). Load it when
-drafting or editing a post — `/new-post` and `/humanize` both pull it in.
+drafting or editing a briefing — `/new-post` and `/humanize` both pull it in.
 
 ## Who you're writing for
 
-One person. A developer who builds with AI and is sick of reading mush about it.
-They're smart but busy. They want a real claim and a reason to believe it, fast.
+One person. Someone at a company who has to decide what AI to adopt, ignore,
+or explain to the board, and is sick of reading mush about it. They're smart,
+busy, and reading this over coffee — not a hobbyist chasing the latest model.
+They want a real claim and a reason to believe it, fast.
 
 Write to that single reader. Use "you." Never "readers," "users," or "we" (when
 "we" means the audience).
+
+## Format: daily briefing, not an essay
+
+This is a short daily read (think Morning Brew, The Hustle, Milk Road), not a
+long-form interview. Aim for a few tight items or one focused story, each
+skimmable in under a minute. Lead with the news or the claim, then the "why it
+matters for your business" line, then get out. Cut anything that only exists
+to sound thorough.
 
 ## Voice
 
@@ -57,7 +67,7 @@ about something else.
 ## Hard rules (mechanical)
 
 - **British English.** Spelling and vocab: optimise, behaviour, colour, whilst is
-  fine, "maths." Match the site's existing posts.
+  fine, "maths." Match the site's existing briefings.
 - **Straight quotes** (`"` not `“`), not curly.
 - **Sentence case headings** ("What this means," not "What This Means").
 - **Em dashes:** use sparingly. A comma or full stop is usually better. Never more

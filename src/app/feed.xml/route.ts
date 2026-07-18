@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/posts";
+import { getAllBriefings } from "@/lib/briefings";
 import { site } from "@/lib/site";
 
 function escapeXml(value: string): string {
@@ -11,22 +11,22 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const posts = getAllPosts();
+  const briefings = getAllBriefings();
   const updated =
-    posts[0]?.frontmatter.date ?? new Date().toISOString().slice(0, 10);
+    briefings[0]?.frontmatter.date ?? new Date().toISOString().slice(0, 10);
 
-  const items = posts
-    .map((post) => {
-      const url = `${site.url}/blog/${post.slug}`;
+  const items = briefings
+    .map((briefing) => {
+      const url = `${site.url}/news/${briefing.slug}`;
       const pubDate = new Date(
-        `${post.frontmatter.date}T00:00:00Z`,
+        `${briefing.frontmatter.date}T00:00:00Z`,
       ).toUTCString();
       return `    <item>
-      <title>${escapeXml(post.frontmatter.title)}</title>
+      <title>${escapeXml(briefing.frontmatter.title)}</title>
       <link>${url}</link>
       <guid isPermaLink="true">${url}</guid>
       <pubDate>${pubDate}</pubDate>
-      <description>${escapeXml(post.frontmatter.description)}</description>
+      <description>${escapeXml(briefing.frontmatter.description)}</description>
     </item>`;
     })
     .join("\n");

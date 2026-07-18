@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import { getAllBriefings, getBriefingBySlug } from "@/lib/briefings";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
 import { Mdx } from "@/components/mdx";
 import { NewsletterCta } from "@/components/newsletter-cta";
 import { Container } from "@/components/container";
-import { PostToc } from "@/components/post-toc";
+import { BriefingToc } from "@/components/briefing-toc";
 import { extractHeadings } from "@/lib/toc";
 
 export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  return getAllBriefings().map((briefing) => ({ slug: briefing.slug }));
 }
 
-// 404 on any slug that isn't a real post rather than rendering on demand.
+// 404 on any slug that isn't a real briefing rather than rendering on demand.
 export const dynamicParams = false;
 
 export async function generateMetadata({
@@ -23,25 +23,25 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) return {};
+  const briefing = getBriefingBySlug(slug);
+  if (!briefing) return {};
 
-  const { title, description, date, image, tags } = post.frontmatter;
-  const url = `${site.url}/blog/${slug}`;
-  const ogImage = image ?? `/blog/${slug}/opengraph-image`;
+  const { title, description, date, image, tags } = briefing.frontmatter;
+  const url = `${site.url}/news/${slug}`;
+  const ogImage = image ?? `/news/${slug}/opengraph-image`;
 
   return {
     title,
     description,
     keywords: tags,
-    alternates: { canonical: `/blog/${slug}` },
+    alternates: { canonical: `/news/${slug}` },
     openGraph: {
       type: "article",
       title,
       description,
       url,
       publishedTime: date,
-      authors: [post.frontmatter.author],
+      authors: [briefing.frontmatter.author],
       images: [{ url: ogImage }],
     },
     twitter: {
@@ -53,26 +53,26 @@ export async function generateMetadata({
   };
 }
 
-export default async function PostPage({
+export default async function BriefingPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
-  if (!post) notFound();
+  const briefing = getBriefingBySlug(slug);
+  if (!briefing) notFound();
 
-  const { frontmatter, content, readingTimeMinutes } = post;
+  const { frontmatter, content, readingTimeMinutes } = briefing;
   const headings = extractHeadings(content);
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": "NewsArticle",
     headline: frontmatter.title,
     description: frontmatter.description,
     datePublished: frontmatter.date,
     author: { "@type": "Person", name: frontmatter.author },
-    url: `${site.url}/blog/${slug}`,
+    url: `${site.url}/news/${slug}`,
   };
 
   return (
@@ -86,17 +86,17 @@ export default async function PostPage({
         {headings.length > 0 && (
           <aside className="hidden lg:block">
             <div className="sticky top-8">
-              <PostToc headings={headings} />
+              <BriefingToc headings={headings} />
             </div>
           </aside>
         )}
 
         <article className="min-w-0">
           <Link
-            href="/blog"
+            href="/news"
             className="text-sm text-muted transition-colors hover:text-brand"
           >
-            ← All posts
+            ← All news
           </Link>
 
           <header className="mt-6 mb-10 rounded-2xl bg-brand p-6 text-brand-foreground sm:p-8">

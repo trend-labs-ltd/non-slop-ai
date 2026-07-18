@@ -1,20 +1,20 @@
 import { ImageResponse } from "next/og";
-import { getPostBySlug } from "@/lib/posts";
+import { getBriefingBySlug } from "@/lib/briefings";
 import { site } from "@/lib/site";
 
-export const alt = "Non Slop AI post";
+export const alt = "Non Slop AI briefing";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Generates the social share card for each post at build time.
+// Generates the social share card for each briefing at build time.
 export default async function Image({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
-  const title = post?.frontmatter.title ?? site.name;
+  const briefing = getBriefingBySlug(slug);
+  const title = briefing?.frontmatter.title ?? site.name;
 
   return new ImageResponse(
     (
