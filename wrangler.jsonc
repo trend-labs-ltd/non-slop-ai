@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "non-slop-ai",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2026-07-19",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	}
+	// No "images" binding: our briefing images live in R2/MinIO behind a
+	// public URL (listmonk's media library, see scripts/upload-images.mjs),
+	// not uploaded through Cloudflare's own Images product — the IMAGES
+	// binding only optimizes the latter. A custom next/image loader against
+	// Cloudflare's zone-level Image Resizing (/cdn-cgi/image/) is the right
+	// fit for external-origin images; not wired up yet, follow-up task.
+	//
+	// No "r2_buckets" incremental cache binding: the site is ~100% static
+	// (generateStaticParams + dynamicParams = false), no ISR/revalidateTag
+	// usage anywhere, so there's nothing for it to cache.
+}
