@@ -18,19 +18,24 @@ async function sendWelcomeEmail(email: string) {
   }
 
   const auth = "Basic " + Buffer.from(`${apiUser}:${apiKey}`).toString("base64");
-  const res = await fetch(`${listmonkUrl}/api/tx`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: auth },
-    body: JSON.stringify({
-      subscriber_emails: [email],
-      template_id: Number(templateId),
-    }),
-  });
 
-  // Best-effort — a welcome email failing shouldn't block the confirm flow
-  // the subscriber is actively waiting on.
-  if (!res.ok) {
-    console.error("listmonk welcome tx send failed:", res.status, await res.text());
+  // Best-effort — a welcome email failing (whether listmonk is unreachable
+  // or just returns an error) shouldn't block the confirm flow the
+  // subscriber is actively waiting on.
+  try {
+    const res = await fetch(`${listmonkUrl}/api/tx`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: auth },
+      body: JSON.stringify({
+        subscriber_emails: [email],
+        template_id: Number(templateId),
+      }),
+    });
+    if (!res.ok) {
+      console.error("listmonk welcome tx send failed:", res.status, await res.text());
+    }
+  } catch (error) {
+    console.error("listmonk welcome tx send unreachable:", error);
   }
 }
 
@@ -45,17 +50,21 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${siteUrl}/newsletter/confirmed?ok=0`);
   }
 
-  const res = await fetch(
-    `${listmonkUrl}/subscription/optin/${encodeURIComponent(uuid)}?confirm=true`,
-  );
-
-  if (!res.ok) {
-    console.error("listmonk optin confirm failed:", res.status, await res.text());
-  } else if (email) {
-    await sendWelcomeEmail(email);
+  let ok = false;
+  try {
+    const res = await fetch(
+      `${listmonkUrl}/subscription/optin/${encodeURIComponent(uuid)}?confirm=true`,
+    );
+    ok = res.ok;
+    if (!res.ok) {
+      console.error("listmonk optin confirm failed:", res.status, await res.text());
+    } else if (email) {
+      await sendWelcomeEmail(email);
+    }
+  } catch (error) {
+    // listmonk unreachable — same "failed" redirect shape as a non-ok response.
+    console.error("listmonk optin confirm unreachable:", error);
   }
 
-  return NextResponse.redirect(
-    `${siteUrl}/newsletter/confirmed?ok=${res.ok ? "1" : "0"}`,
-  );
+  return NextResponse.redirect(`${siteUrl}/newsletter/confirmed?ok=${ok ? "1" : "0"}`);
 }

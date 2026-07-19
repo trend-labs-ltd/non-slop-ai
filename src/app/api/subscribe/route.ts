@@ -113,20 +113,31 @@ export async function POST(request: Request) {
   const auth = "Basic " + Buffer.from(`${apiUser}:${apiKey}`).toString("base64");
   const attribs = buildAttribs(request, parsed.data);
 
-  const create = await fetch(`${listmonkUrl}/api/subscribers`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: auth },
-    body: JSON.stringify({
-      email: parsed.data.email,
-      status: "enabled",
-      attribs,
-      // The admin create-subscriber endpoint only reads numeric "lists" IDs
-      // — unlike the public subscription endpoint, it silently ignores
-      // "list_uuids" entirely (confirmed against listmonk v6.2.0 source).
-      lists: [Number(listId)],
-      preconfirm_subscriptions: false,
-    }),
-  });
+  let create: Response;
+  try {
+    create = await fetch(`${listmonkUrl}/api/subscribers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: auth },
+      body: JSON.stringify({
+        email: parsed.data.email,
+        status: "enabled",
+        attribs,
+        // The admin create-subscriber endpoint only reads numeric "lists" IDs
+        // — unlike the public subscription endpoint, it silently ignores
+        // "list_uuids" entirely (confirmed against listmonk v6.2.0 source).
+        lists: [Number(listId)],
+        preconfirm_subscriptions: false,
+      }),
+    });
+  } catch (error) {
+    // listmonk unreachable (DNS/connection failure) — same graceful shape as
+    // a non-ok response below, not an unhandled 500.
+    console.error("listmonk create subscriber unreachable:", error);
+    return NextResponse.json(
+      { message: "Couldn't subscribe you right now. Try again later." },
+      { status: 502 },
+    );
+  }
 
   // 409 means they're already subscribed — that's success from the user's
   // point of view, just without a fresh attribs snapshot for this visit
