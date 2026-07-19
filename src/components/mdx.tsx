@@ -1,6 +1,7 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
+import NextImage from "next/image";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -34,6 +35,33 @@ const components: MDXComponents = {
     </div>
   ),
   Tools,
+  // Briefing body images. width/height are required (not optional/inferred)
+  // so next/image can reserve layout space and avoid CLS — both come
+  // straight out of `node scripts/upload-images.mjs`'s output alongside the
+  // uploaded url. Usage in MDX:
+  // <Image src="https://.../foo.png" alt="..." width={1200} height={630} />
+  Image: ({
+    src,
+    alt,
+    width,
+    height,
+  }: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  }) => (
+    <div className="not-prose my-6 overflow-hidden rounded-lg border border-border">
+      <NextImage
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        sizes="(min-width: 768px) 768px, 100vw"
+        className="h-auto w-full"
+      />
+    </div>
+  ),
   // Privacy-friendly YouTube embed: nocookie host, lazy-loaded so it doesn't
   // block first paint. Usage in MDX: <YouTube id="iQyg-KypKAA" title="..." />
   YouTube: ({ id, title }: { id: string; title?: string }) => (
