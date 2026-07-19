@@ -17,10 +17,6 @@
 /.next/
 /out/
 
-# cloudflare (opennextjs build output, wrangler local state)
-/.open-next/
-/.wrangler/
-
 # production
 /build
 
