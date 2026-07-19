@@ -71,7 +71,12 @@ services:
       timeout: 5s
       retries: 6
     volumes:
-      - listmonk-data:/var/lib/postgresql/data
+      # Postgres 18's image expects the volume at /var/lib/postgresql (not
+      # .../data as in 17 and earlier) — it places data in a version-specific
+      # subdirectory itself now, and refuses to start against the old mount
+      # point convention as a safety check against silently reading
+      # wrong-version data.
+      - listmonk-data:/var/lib/postgresql
 
   # Fake SMTP server + web UI for local dev — point listmonk's SMTP settings
   # at it (host "mailpit", port 1025, no auth/TLS) to see real opt-in /
