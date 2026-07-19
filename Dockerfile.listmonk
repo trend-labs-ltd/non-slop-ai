@@ -1,0 +1,13 @@
+# Prod listmonk image for Railway. Local dev instead bind-mounts ./static
+# read-only into the stock image (see docker-compose.yml) — this Dockerfile
+# exists only because Railway builds images rather than mounting repo files
+# at runtime. Same static/ dir, same runtime __SITE_URL__ substitution
+# logic, just COPY'd in at build time instead of bind-mounted.
+FROM listmonk/listmonk:latest
+
+COPY static/email-templates/ /listmonk-static/email-templates/
+
+# Baked-in files (unlike the :ro bind mount in dev) are already writable,
+# so sed can run in place — no need for the cp-to-scratch step dev's
+# command uses to work around the read-only mount.
+CMD ["sh", "-c", "find /listmonk-static -type f -exec sed -i \"s|__SITE_URL__|${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}|g\" {} + && ./listmonk --install --idempotent --yes --config '' --static-dir=/listmonk-static && ./listmonk --upgrade --yes --config '' --static-dir=/listmonk-static && ./listmonk --config '' --static-dir=/listmonk-static"]
